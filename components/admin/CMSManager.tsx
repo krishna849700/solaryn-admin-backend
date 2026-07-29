@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Save, RefreshCw, CheckCircle, Image, Globe, Phone, FileText, Sparkles, UserCheck, Layers, Folder, MessageSquare } from "lucide-react";
+import { Save, RefreshCw, CheckCircle, Image, Globe, Phone, FileText, Sparkles, UserCheck, Layers, Folder, MessageSquare, AlertTriangle } from "lucide-react";
 
 export function CMSManager() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -48,12 +48,15 @@ export function CMSManager() {
       if (res.ok) {
         setMessage("All CMS website content and photo settings saved successfully!");
         setTimeout(() => setMessage(null), 4000);
+      } else if (res.status === 401) {
+        setMessage("SESSION_EXPIRED: Your admin session has expired. Please log out and log in again.");
       } else {
-        setMessage("Error saving CMS settings.");
+        const errData = await res.json().catch(() => ({}));
+        setMessage(errData.error || "Error saving CMS settings. Please try again.");
       }
     } catch (err) {
       console.error("Save error:", err);
-      setMessage("Error connecting to server.");
+      setMessage("Error connecting to server. Please check your network connection.");
     } finally {
       setSaving(false);
     }
@@ -98,11 +101,27 @@ export function CMSManager() {
       </header>
 
       {message && (
-        <div className={`p-3.5 px-6 text-xs font-bold flex items-center gap-2 ${
-          message.includes("Error") ? "bg-red-50 text-red-700 border-b border-red-200" : "bg-emerald-50 text-emerald-800 border-b border-emerald-200"
+        <div className={`p-3.5 px-6 text-xs font-bold flex items-center justify-between gap-2 ${
+          message.includes("Error") || message.includes("SESSION_EXPIRED") 
+            ? "bg-red-50 text-red-700 border-b border-red-200" 
+            : "bg-emerald-50 text-emerald-800 border-b border-emerald-200"
         }`}>
-          <CheckCircle className="w-4 h-4 shrink-0" />
-          {message}
+          <div className="flex items-center gap-2">
+            {message.includes("SESSION_EXPIRED") || message.includes("Error") ? (
+              <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+            ) : (
+              <CheckCircle className="w-4 h-4 shrink-0 text-emerald-600" />
+            )}
+            <span>{message.replace("SESSION_EXPIRED: ", "")}</span>
+          </div>
+          {message.includes("SESSION_EXPIRED") && (
+            <a
+              href="/admin/login"
+              className="px-3 py-1 bg-red-700 text-white rounded-full text-[11px] hover:bg-red-800 font-bold"
+            >
+              Re-login Now
+            </a>
+          )}
         </div>
       )}
 
