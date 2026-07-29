@@ -1,0 +1,134 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export const DEFAULT_SITE_SETTINGS: Record<string, string> = {
+  // Hero & Branding
+  hero_badge: "[ #1 RATED SOLAR PROVIDER IN BENGALURU ]",
+  hero_title: "Power Your Home & Business With Clean Solar Energy",
+  hero_subtitle: "Zero down payment rooftop solar systems, 5 HP solar pumps, and battery storage. Cut your electricity bill by up to 90% in Bengaluru & Karnataka.",
+  hero_cta_primary: "Request Free Site Audit & Quote",
+  hero_cta_phone: "073380 10012",
+  hero_bg_image: "/images/hero_bg.jpg",
+  logo_image: "/images/logo.png",
+  cta_banner_title: "Start Your Next Project With Us",
+  cta_banner_subtitle: "Join 50,000+ satisfied home and business owners lowering their utility bills while reducing carbon emissions with Solaryn.",
+  cta_banner_bg_image: "/images/cta_bg.jpg",
+
+  // Business Details & Contact
+  company_name: "Konark Solar",
+  company_kannada_name: "ಕೊನಾರ್ಕ್ ಸೋಲಾರ್",
+  phone_hotline: "073380 10012",
+  whatsapp_number: "917338010012",
+  contact_address: "21, Dwarka Rd, Doddabommasandra, Vidyaranyapura, Deshbandhunagara, Bengaluru, Karnataka 560097",
+  operating_hours: "Mon - Sat: 9:00 AM - 7:30 PM",
+  rating_stars: "4.9",
+  review_count: "176",
+
+  // About Section (Screenshot 1)
+  about_badge: "[ ABOUT KONARK SOLAR • ಕೊನಾರ್ಕ್ ಸೋಲಾರ್ ]",
+  about_title: "Customer Satisfaction Is Our Priority",
+  about_cta_label: "Consult Chikke Gowda (Owner)",
+  about_market_leadership_title: "Market Leadership",
+  about_market_leadership_desc: "Helmed by Chikke Gowda, Konark Solar is recognized as #1 in the market for transparent estimates, technical excellence, and low-cost budget friendly solar setups.",
+  about_generation_badge: "High Daily Generation Performance",
+  about_generation_title: "16 Units/Day Peak Solar Generation",
+  about_generation_desc: "Generates ~16 units per day on sunny days and ~8 units even on cloudy Bengaluru days, securing maximum utility savings for residential and commercial customers.",
+  about_standard_materials_title: "Standard Materials",
+  about_standard_materials_desc: "We install high-grade solar modules (including Loom Solar), premium battery banks, and robust mounting structures with technically sound installation teams.",
+  about_img_wind: "/images/solar_borewell_farm_live.png",
+  about_img_house: "/images/rooftop_installation_live.jpg",
+  about_img_team: "/images/process_engineers.jpg",
+
+  // Services Section (Screenshot 2)
+  services_badge: "[ KONARK SOLAR SERVICES ]",
+  services_title: "Standard Quality Materials & Budget Friendly Solutions",
+  services_cta_label: "Get Quotation",
+  service_1_title: "ROOFTOP SOLAR",
+  service_1_desc: "Custom high-efficiency rooftop solar installations generating 16+ units per day. Built with standard quality materials, high-performance Loom Solar modules, and guaranteed long-term utility savings.",
+  service_1_img: "/images/rooftop_installation_live.jpg",
+  service_2_title: "5 HP BOREWELL PUMPS",
+  service_2_desc: "High-torque 5 HP solar borewell pumps for agricultural farms and estates in Doddabalapura, Devanahalli, and rural Bengaluru. Zero grid reliance with automatic daylight pumping controllers.",
+  service_2_img: "/images/solar_borewell_farm_live.png",
+  service_3_title: "BATTERY SYSTEMS",
+  service_3_desc: "Prompt delivery and installation of dual battery packs (2 nos 150Ah/200Ah) and heavy-duty tubular batteries for 24/7 uninterrupted power back-up.",
+  service_3_img: "/images/project_battery.jpg",
+  service_4_title: "FAST INSTALLATION",
+  service_4_desc: "Technically sound installation team trained to complete rooftop installations smoothly with robust mounting hardware, elevated structural frames, and safe wiring.",
+  service_4_img: "/images/rooftop_installation_live.jpg",
+  service_5_title: "EQUIPMENT SUPPLY",
+  service_5_desc: "Wholesale & retail supplier of solar panels (Loom Solar, Adani, Vikram), MPPT charge controllers, solar inverters, and heavy-duty solar cables across Karnataka.",
+  service_5_img: "/images/blog_office.jpg",
+  service_6_title: "MAINTENANCE & REPAIR",
+  service_6_desc: "Prompt after-sales service, panel cleaning, battery electrolyte testing, inverter health diagnostics, and solar plant performance optimization.",
+  service_6_img: "/images/process_engineers.jpg",
+
+  // Process Section (Screenshot 3)
+  process_badge: "[ OUR PROCESS ]",
+  process_title: "Switching To Solar In 3 Easy Steps",
+  process_step1_title: "Free Consultation",
+  process_step1_desc: "Get a free comprehensive energy audit, site shade analysis, and custom solar microgrid recommendation tailored to your utility budget.",
+  process_step1_details: "Our certified energy consultants perform digital LiDAR roof modeling to project 25-year production outputs.",
+  process_step2_title: "Design & Install",
+  process_step2_desc: "We handle all engineering permits, utility interconnection approvals, and rapid 1-day certified hardware installation.",
+  process_step2_details: "Top-tier Tier-1 monocrystalline panels with microinverters installed under strict electrical safety codes.",
+  process_step3_title: "Start & Saving",
+  process_step3_desc: "Activate your solar system, switch to clean green power, and enjoy immediate 50-80% reductions on monthly utility bills.",
+  process_step3_details: "24/7 live mobile app monitoring tracks instantaneous solar generation, power storage, and grid exports.",
+  process_card_badge: "Live Project Deployment",
+  process_card_title: "Certified Solar Engineering Team",
+  process_card_desc: "Our NABCEP-certified technicians conduct on-site inspections to ensure optimal panel placement and zero structural compromise.",
+  process_img: "/images/process_engineers.jpg",
+
+  // Projects Section (Screenshot 4)
+  projects_badge: "[ KONARK SOLAR PROJECTS ]",
+  projects_title: "Verified Installations Across Bengaluru & Karnataka",
+  project_1_title: "5 HP Solar Borewell Pump Installation",
+  project_1_desc: "High-performance 5 HP solar borewell pump installation providing uninterrupted agricultural water pumping without grid dependence.",
+  project_1_badge: "Agricultural • 5 HP Solar Submersible Pump",
+  project_1_img: "/images/solar_borewell_farm_live.png",
+  project_2_title: "16 Units/Day High Yield Rooftop Solar Unit",
+  project_2_desc: "Residential rooftop solar installation generating ~16 units per day on sunny days and ~8 units on cloudy days.",
+  project_2_badge: "Residential • 3.5 kW Rooftop System",
+  project_2_img: "/images/rooftop_installation_live.jpg",
+  project_3_title: "Dual Heavy-Duty Battery Storage Setup (2 Nos)",
+  project_3_desc: "On-time delivery and precision installation of dual 200Ah battery bank providing complete power backup during outages.",
+  project_3_badge: "Commercial • 2 Nos Tubular Batteries + Inverter",
+  project_3_img: "/images/project_battery.jpg",
+  project_4_title: "Commercial Loom Solar Photovoltaic Plant",
+  project_4_desc: "High-capacity commercial solar installation for office & equipment supplier facility utilizing Loom Solar technology.",
+  project_4_badge: "Commercial • 12 kW Grid-Tied Solar Plant",
+  project_4_img: "/images/project_textile.jpg",
+
+  // Testimonials & Articles Section (Screenshot 5)
+  testimonials_badge: "[ REVIEWS & TESTIMONIALS ]",
+  testimonials_title: "Shining Testimonials From Satisfied Clients",
+  testimonial_quote: "\"I recently got my rooftop solar system installed by Konark Solar, and I'm extremely satisfied with the entire experience. Low cost, budget friendly, and customer satisfaction is their priority!\"",
+  testimonial_author: "Sunil Kadam",
+  testimonial_author_tag: "[LOCAL GUIDE • 15 REVIEWS]",
+  testimonial_response: "Response from Konark Solar Owner: Thanks sir!",
+  testimonial_img: "/images/blog_office.jpg",
+  blogs_badge: "[ ARTICLE & BLOGS ]",
+  blogs_title: "Discover Articles Crafted By Industry Professionals",
+  blog_1_title: "From Sunlight to Savings: How Solar Panels Reduce Monthly Energy Expenditures",
+  blog_1_excerpt: "Solar energy is no longer just an environmental decision; it is one of the most lucrative financial investments available for property owners in 2026.",
+  blog_1_img: "/images/blog_solar_field.jpg",
+  blog_2_title: "Why Investing in Solar Energy & Battery Storage Makes Sense in 2025 and Beyond",
+  blog_2_excerpt: "With federal tax incentives, net metering policies, and falling battery storage costs, clean microgrids deliver rapid 3-to-4 year financial payback.",
+  blog_2_img: "/images/blog_office.jpg",
+};
+
+export async function GET() {
+  try {
+    const dbSettings = await prisma.siteSetting.findMany();
+    const settingsMap: Record<string, string> = { ...DEFAULT_SITE_SETTINGS };
+
+    dbSettings.forEach((item) => {
+      settingsMap[item.key] = item.value;
+    });
+
+    return NextResponse.json({ settings: settingsMap });
+  } catch (err) {
+    console.error("[api/content] Error fetching settings:", err);
+    return NextResponse.json({ settings: DEFAULT_SITE_SETTINGS });
+  }
+}
