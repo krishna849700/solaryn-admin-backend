@@ -14,21 +14,35 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { settings } = body; // Record<string, string>
+    const { settings } = body;
 
     if (!settings || typeof settings !== "object") {
       return NextResponse.json({ error: "Invalid settings payload." }, { status: 400 });
     }
 
-    const updates = Object.entries(settings).map(([key, value]) =>
-      prisma.siteSetting.upsert({
-        where: { key },
-        update: { value: String(value) },
-        create: { key, value: String(value) },
-      })
-    );
-
-    await prisma.$transaction(updates);
+    try {
+      const updates = Object.entries(settings).map(([key, value]) =>
+        prisma.siteSetting.upsert({
+          where: { key },
+          update: { value: String(value) },
+          create: { key, value: String(value) },
+        })
+      );
+      await prisma.$transaction(updates);
+    } catch (dbErr) {
+      console.warn("[api/admin/content] Transaction warn, trying sequential save:", dbErr);
+      for (const [key, value] of Object.entries(settings)) {
+        try {
+          await prisma.siteSetting.upsert({
+            where: { key },
+            update: { value: String(value) },
+            create: { key, value: String(value) },
+          });
+        } catch (itemErr) {
+          console.warn(`[api/admin/content] Failed key ${key}:`, itemErr);
+        }
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

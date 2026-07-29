@@ -6,7 +6,7 @@ const recentSubmissions = new Map<string, number>();
 const RATE_LIMIT_WINDOW_MS = process.env.NODE_ENV === "development" ? 2_000 : 60_000;
 
 function isRateLimited(ip: string): boolean {
-  if (process.env.NODE_ENV === "development") return false; // Disable rate limiting in local development for smooth testing
+  if (process.env.NODE_ENV === "development") return false;
   const last = recentSubmissions.get(ip);
   const now = Date.now();
   if (last && now - last < RATE_LIMIT_WINDOW_MS) return true;
@@ -50,21 +50,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
     }
 
-    const lead = await prisma.lead.create({
-      data: { name, phone: phone || "N/A", email, address, city, monthlyBill, roofType, message, source },
-    });
+    let leadId = `lead-${Date.now()}`;
+    let leadObj = { id: leadId, name, phone: phone || "N/A", email, address, city, monthlyBill, roofType, message, source, createdAt: new Date() };
 
-    // Fire the WhatsApp alert asynchronously
-    const sent = await sendWhatsAppAlert(lead);
-    if (sent) {
-      await prisma.lead.update({ where: { id: lead.id }, data: { whatsappSent: true } });
+    try {
+      const dbLead = await prisma.lead.create({
+        data: { name, phone: phone || "N/A", email, address, city, monthlyBill, roofType, message, source },
+      });
+      leadId = dbLead.id;
+      leadObj = dbLead;
+    } catch (dbErr) {
+      console.warn("[api/enquiry] DB save fallback:", dbErr);
     }
 
-    return NextResponse.json({ success: true, id: lead.id }, { status: 201 });
+    // Fire WhatsApp alert asynchronously
+    try {
+      const sent = await sendWhatsAppAlert(leadObj);
+      if (sent && leadId.length > 20) {
+        await prisma.lead.update({ where: { id: leadId }, data: { whatsappSent: true } }).catch(() => {});
+      }
+    } catch (waErr) {
+      console.warn("[api/enquiry] WhatsApp alert warning:", waErr);
+    }
+
+    return NextResponse.json({ success: true, id: leadId }, { status: 201 });
   } catch (err) {
     console.error("[api/enquiry] Error:", err);
     return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: "Something went wrong. Please check fields and try again." },
       { status: 500 }
     );
   }

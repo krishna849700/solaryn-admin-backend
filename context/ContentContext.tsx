@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { DEFAULT_SITE_SETTINGS } from "@/app/api/content/route";
+import { DEFAULT_SITE_SETTINGS } from "@/lib/constants";
 
 interface ContentContextType {
   settings: Record<string, string>;
